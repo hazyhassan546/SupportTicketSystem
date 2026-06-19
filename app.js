@@ -11,6 +11,7 @@ var db = require('./db');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var ticketsRouter = require('./routes/tickets');
+var lookupsRouter = require('./routes/lookups');
 
 var app = express();
 
@@ -28,6 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/tickets', ticketsRouter);
+app.use('/api/lookups', lookupsRouter);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

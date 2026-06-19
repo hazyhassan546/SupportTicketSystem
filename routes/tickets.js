@@ -8,10 +8,15 @@ router.get('/', async (req, res) => {
     const connection = await pool.getConnection();
     const [tickets] = await connection.query(
       `SELECT t.*, u.name as user_name, u.email as user_email, 
-              a.name as assigned_name
+              a.name as assigned_name, r.name as role_name,
+              tc.name as category_name, p.name as priority_name, ts.name as status_name
        FROM tickets t
        LEFT JOIN users u ON t.user_id = u.id
        LEFT JOIN users a ON t.assigned_to = a.id
+       LEFT JOIN roles r ON u.role_id = r.id
+       LEFT JOIN ticket_categories tc ON t.category_id = tc.id
+       LEFT JOIN priorities p ON t.priority_id = p.id
+       LEFT JOIN ticket_statuses ts ON t.status_id = ts.id
        ORDER BY t.created_at DESC`
     );
     connection.release();
@@ -37,10 +42,15 @@ router.get('/:id', async (req, res) => {
     
     const [tickets] = await connection.query(
       `SELECT t.*, u.name as user_name, u.email as user_email,
-              a.name as assigned_name
+              a.name as assigned_name, r.name as role_name,
+              tc.name as category_name, p.name as priority_name, ts.name as status_name
        FROM tickets t
        LEFT JOIN users u ON t.user_id = u.id
        LEFT JOIN users a ON t.assigned_to = a.id
+       LEFT JOIN roles r ON u.role_id = r.id
+       LEFT JOIN ticket_categories tc ON t.category_id = tc.id
+       LEFT JOIN priorities p ON t.priority_id = p.id
+       LEFT JOIN ticket_statuses ts ON t.status_id = ts.id
        WHERE t.id = ?`,
       [id]
     );
@@ -55,9 +65,10 @@ router.get('/:id', async (req, res) => {
 
     // Get comments for the ticket
     const [comments] = await connection.query(
-      `SELECT tc.*, u.name, u.email
+      `SELECT tc.*, u.name, u.email, r.name as role_name
        FROM ticket_comments tc
        LEFT JOIN users u ON tc.user_id = u.id
+       LEFT JOIN roles r ON u.role_id = r.id
        WHERE tc.ticket_id = ?
        ORDER BY tc.created_at DESC`,
       [id]
@@ -84,13 +95,13 @@ router.get('/:id', async (req, res) => {
 // CREATE new ticket
 router.post('/', async (req, res) => {
   try {
-    const { user_id, title, description, category, priority } = req.body;
+    const { user_id, title, description, category_id, priority_id } = req.body;
 
     // Validation
-    if (!user_id || !title || !description || !category) {
+    if (!user_id || !title || !description || !category_id) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: user_id, title, description, category'
+        message: 'Missing required fields: user_id, title, description, category_id'
       });
     }
 
@@ -110,10 +121,39 @@ router.post('/', async (req, res) => {
       });
     }
 
+    // Check if category exists
+    const [categories] = await connection.query(
+      'SELECT id FROM ticket_categories WHERE id = ?',
+      [category_id]
+    );
+
+    if (categories.length === 0) {
+      connection.release();
+      return res.status(404).json({
+        success: false,
+        message: 'Category not found'
+      });
+    }
+
+    // Check if priority exists (if provided)
+    if (priority_id) {
+      const [priorities] = await connection.query(
+        'SELECT id FROM priorities WHERE id = ?',
+        [priority_id]
+      );
+      if (priorities.length === 0) {
+        connection.release();
+        return res.status(404).json({
+          success: false,
+          message: 'Priority not found'
+        });
+      }
+    }
+
     const [result] = await connection.query(
-      `INSERT INTO tickets (user_id, title, description, category, priority)
-       VALUES (?, ?, ?, ?, ?)`,
-      [user_id, title, description, category, priority || 'medium']
+      `INSERT INTO tickets (user_id, title, description, category_id, priority_id, status_id)
+       VALUES (?, ?, ?, ?, ?, 1)`,
+      [user_id, title, description, category_id, priority_id || 2]
     );
     
     connection.release();
@@ -126,9 +166,9 @@ router.post('/', async (req, res) => {
         user_id,
         title,
         description,
-        category,
-        priority: priority || 'medium',
-        status: 'open'
+        category_id,
+        priority_id: priority_id || 2,
+        status_id: 1
       }
     });
   } catch (error) {
@@ -144,7 +184,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, category, priority, status, assigned_to } = req.body;
+    const { title, description, category_id, priority_id, status_id, assigned_to } = req.body;
 
     const connection = await pool.getConnection();
 
@@ -174,20 +214,20 @@ router.put('/:id', async (req, res) => {
       updateFields.push('description = ?');
       updateValues.push(description);
     }
-    if (category !== undefined) {
-      updateFields.push('category = ?');
-      updateValues.push(category);
+    if (category_id !== undefined) {
+      updateFields.push('category_id = ?');
+      updateValues.push(category_id);
     }
-    if (priority !== undefined) {
-      updateFields.push('priority = ?');
-      updateValues.push(priority);
+    if (priority_id !== undefined) {
+      updateFields.push('priority_id = ?');
+      updateValues.push(priority_id);
     }
-    if (status !== undefined) {
-      updateFields.push('status = ?');
-      updateValues.push(status);
+    if (status_id !== undefined) {
+      updateFields.push('status_id = ?');
+      updateValues.push(status_id);
       
-      // Set resolved_at if status is resolved
-      if (status === 'resolved') {
+      // Set resolved_at if status is resolved (status_id = 4)
+      if (status_id === 4) {
         updateFields.push('resolved_at = NOW()');
       }
     }

@@ -1,8 +1,8 @@
 {
   "info": {
     "name": "Support Ticket System API",
-    "description": "API collection for Support Ticket Management System",
-    "version": "1.0.0"
+    "description": "Complete API collection for Support Ticket Management System with Lookup Tables and Role Management",
+    "version": "2.0.0"
   },
   "item": [
     {
@@ -12,6 +12,184 @@
         "header": [],
         "url": "http://localhost:3000/api/health"
       }
+    },
+    {
+      "name": "Lookups",
+      "item": [
+        {
+          "name": "Get All Lookups",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/lookups/all"
+          }
+        },
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/lookups/roles"
+          }
+        },
+        {
+          "name": "Get Single Role",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/lookups/roles/1"
+          }
+        },
+        {
+          "name": "Create Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"manager\",\n  \"description\": \"Manager role\",\n  \"status\": \"active\"\n}"
+            },
+            "url": "http://localhost:3000/api/lookups/roles"
+          }
+        },
+        {
+          "name": "Get All Priorities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/lookups/priorities"
+          }
+        },
+        {
+          "name": "Get Single Priority",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/lookups/priorities/1"
+          }
+        },
+        {
+          "name": "Get All Statuses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/lookups/statuses"
+          }
+        },
+        {
+          "name": "Get Single Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/lookups/statuses/1"
+          }
+        },
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/lookups/categories"
+          }
+        },
+        {
+          "name": "Get Single Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/lookups/categories/1"
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Security Issue\",\n  \"description\": \"Security-related issues\",\n  \"status\": \"active\"\n}"
+            },
+            "url": "http://localhost:3000/api/lookups/categories"
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": "http://localhost:3000/api/lookups/categories/1"
+          }
+        },
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/lookups/departments"
+          }
+        },
+        {
+          "name": "Get Single Department",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/lookups/departments/1"
+          }
+        },
+        {
+          "name": "Create Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Human Resources\",\n  \"description\": \"HR Department\",\n  \"email\": \"hr@example.com\",\n  \"phone\": \"1234567850\"\n}"
+            },
+            "url": "http://localhost:3000/api/lookups/departments"
+          }
+        },
+        {
+          "name": "Update Department",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newemail@example.com\"\n}"
+            },
+            "url": "http://localhost:3000/api/lookups/departments/1"
+          }
+        }
+      ]
     },
     {
       "name": "Users",
@@ -44,7 +222,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"newuser@example.com\",\n  \"phone\": \"1234567890\",\n  \"role\": \"user\"\n}"
+              "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"newuser@example.com\",\n  \"phone\": \"5555555555\",\n  \"role_id\": 1,\n  \"department_id\": 1\n}"
             },
             "url": "http://localhost:3000/api/users"
           }
@@ -61,7 +239,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated User\",\n  \"phone\": \"9876543210\",\n  \"status\": \"active\"\n}"
+              "raw": "{\n  \"name\": \"Updated User\",\n  \"role_id\": 2,\n  \"department_id\": 2,\n  \"status\": \"active\"\n}"
             },
             "url": "http://localhost:3000/api/users/1"
           }
@@ -115,7 +293,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": 2,\n  \"title\": \"Login Issue\",\n  \"description\": \"Unable to login to the system\",\n  \"category\": \"Technical Support\",\n  \"priority\": \"high\"\n}"
+              "raw": "{\n  \"user_id\": 4,\n  \"title\": \"Cannot login to account\",\n  \"description\": \"Unable to login to the system. Getting authentication error.\",\n  \"category_id\": 2,\n  \"priority_id\": 3\n}"
             },
             "url": "http://localhost:3000/api/tickets"
           }
@@ -132,7 +310,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"in_progress\",\n  \"priority\": \"urgent\",\n  \"assigned_to\": 1\n}"
+              "raw": "{\n  \"status_id\": 2,\n  \"priority_id\": 4,\n  \"assigned_to\": 2\n}"
             },
             "url": "http://localhost:3000/api/tickets/1"
           }
@@ -157,7 +335,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": 1,\n  \"comment\": \"Working on this issue\"\n}"
+              "raw": "{\n  \"user_id\": 2,\n  \"comment\": \"I have investigated the issue. Working on it.\"\n}"
             },
             "url": "http://localhost:3000/api/tickets/1/comments"
           }

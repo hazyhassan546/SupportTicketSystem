@@ -7,7 +7,12 @@ router.get('/', async (req, res) => {
   try {
     const connection = await pool.getConnection();
     const [users] = await connection.query(
-      'SELECT id, name, email, phone, role, status, created_at, updated_at FROM users ORDER BY created_at DESC'
+      `SELECT u.id, u.name, u.email, u.phone, u.role_id, u.department_id, u.status, 
+              u.created_at, u.updated_at, r.name as role_name, d.name as department_name
+       FROM users u
+       LEFT JOIN roles r ON u.role_id = r.id
+       LEFT JOIN departments d ON u.department_id = d.id
+       ORDER BY u.created_at DESC`
     );
     connection.release();
 
@@ -31,7 +36,12 @@ router.get('/:id', async (req, res) => {
     const connection = await pool.getConnection();
 
     const [users] = await connection.query(
-      'SELECT id, name, email, phone, role, status, created_at, updated_at FROM users WHERE id = ?',
+      `SELECT u.id, u.name, u.email, u.phone, u.role_id, u.department_id, u.status, 
+              u.created_at, u.updated_at, r.name as role_name, d.name as department_name
+       FROM users u
+       LEFT JOIN roles r ON u.role_id = r.id
+       LEFT JOIN departments d ON u.department_id = d.id
+       WHERE u.id = ?`,
       [id]
     );
 
@@ -43,10 +53,15 @@ router.get('/:id', async (req, res) => {
       });
     }
 
-    // Get user's tickets
+    // Get user's tickets with lookup details
     const [tickets] = await connection.query(
-      `SELECT id, title, status, priority, created_at FROM tickets 
-       WHERE user_id = ? ORDER BY created_at DESC`,
+      `SELECT t.id, t.title, t.status_id, ts.name as status_name, 
+              t.priority_id, p.name as priority_name, t.created_at
+       FROM tickets t
+       LEFT JOIN ticket_statuses ts ON t.status_id = ts.id
+       LEFT JOIN priorities p ON t.priority_id = p.id
+       WHERE t.user_id = ? 
+       ORDER BY t.created_at DESC`,
       [id]
     );
 
@@ -71,7 +86,7 @@ router.get('/:id', async (req, res) => {
 // CREATE new user
 router.post('/', async (req, res) => {
   try {
-    const { name, email, phone, role } = req.body;
+    const { name, email, phone, role_id, department_id } = req.body;
 
     // Validation
     if (!name || !email) {
@@ -93,9 +108,33 @@ router.post('/', async (req, res) => {
     const connection = await pool.getConnection();
 
     try {
+      // Verify role exists if provided
+      if (role_id) {
+        const [roles] = await connection.query('SELECT id FROM roles WHERE id = ?', [role_id]);
+        if (roles.length === 0) {
+          connection.release();
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid role_id'
+          });
+        }
+      }
+
+      // Verify department exists if provided
+      if (department_id) {
+        const [departments] = await connection.query('SELECT id FROM departments WHERE id = ?', [department_id]);
+        if (departments.length === 0) {
+          connection.release();
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid department_id'
+          });
+        }
+      }
+
       const [result] = await connection.query(
-        'INSERT INTO users (name, email, phone, role) VALUES (?, ?, ?, ?)',
-        [name, email, phone || null, role || 'user']
+        'INSERT INTO users (name, email, phone, role_id, department_id) VALUES (?, ?, ?, ?, ?)',
+        [name, email, phone || null, role_id || 1, department_id || null]
       );
 
       connection.release();
@@ -108,7 +147,8 @@ router.post('/', async (req, res) => {
           name,
           email,
           phone: phone || null,
-          role: role || 'user',
+          role_id: role_id || 1,
+          department_id: department_id || null,
           status: 'active'
         }
       });
@@ -135,7 +175,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, phone, role, status } = req.body;
+    const { name, email, phone, role_id, department_id, status } = req.body;
 
     const connection = await pool.getConnection();
 
@@ -178,9 +218,13 @@ router.put('/:id', async (req, res) => {
       updateFields.push('phone = ?');
       updateValues.push(phone);
     }
-    if (role !== undefined) {
-      updateFields.push('role = ?');
-      updateValues.push(role);
+    if (role_id !== undefined) {
+      updateFields.push('role_id = ?');
+      updateValues.push(role_id);
+    }
+    if (department_id !== undefined) {
+      updateFields.push('department_id = ?');
+      updateValues.push(department_id);
     }
     if (status !== undefined) {
       updateFields.push('status = ?');
@@ -284,17 +328,19 @@ router.get('/:id/stats', async (req, res) => {
       });
     }
 
-    // Get ticket statistics
+    // Get ticket statistics with lookup data
     const [stats] = await connection.query(
       `SELECT 
         COUNT(*) as total_tickets,
-        SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) as open_tickets,
-        SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress_tickets,
-        SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolved_tickets,
-        SUM(CASE WHEN status = 'closed' THEN 1 ELSE 0 END) as closed_tickets,
-        SUM(CASE WHEN priority = 'urgent' THEN 1 ELSE 0 END) as urgent_tickets
-       FROM tickets
-       WHERE user_id = ?`,
+        SUM(CASE WHEN ts.name = 'open' THEN 1 ELSE 0 END) as open_tickets,
+        SUM(CASE WHEN ts.name = 'in_progress' THEN 1 ELSE 0 END) as in_progress_tickets,
+        SUM(CASE WHEN ts.name = 'resolved' THEN 1 ELSE 0 END) as resolved_tickets,
+        SUM(CASE WHEN ts.name = 'closed' THEN 1 ELSE 0 END) as closed_tickets,
+        SUM(CASE WHEN p.level = 4 THEN 1 ELSE 0 END) as urgent_tickets
+       FROM tickets t
+       LEFT JOIN ticket_statuses ts ON t.status_id = ts.id
+       LEFT JOIN priorities p ON t.priority_id = p.id
+       WHERE t.user_id = ?`,
       [id]
     );
 
