@@ -8,7 +8,12 @@ require('dotenv').config();
 // Database connection
 var db = require('./db');
 
+// Import middleware
+var { verifyToken, checkRole } = require('./middleware/auth');
+
+// Import routes
 var indexRouter = require('./routes/index');
+var authRouter = require('./routes/auth');
 var usersRouter = require('./routes/users');
 var ticketsRouter = require('./routes/tickets');
 var lookupsRouter = require('./routes/lookups');
@@ -27,11 +32,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 app.use('/', indexRouter);
-app.use('/api/users', usersRouter);
-app.use('/api/tickets', ticketsRouter);
-app.use('/api/lookups', lookupsRouter);
 
-// Health check endpoint
+// Auth routes (public)
+app.use('/api/auth', authRouter);
+
+// Health check endpoint (public)
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
@@ -39,6 +44,11 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date()
   });
 });
+
+// Protected routes (require JWT token)
+app.use('/api/users', verifyToken, usersRouter);
+app.use('/api/tickets', verifyToken, ticketsRouter);
+app.use('/api/lookups', verifyToken, lookupsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
