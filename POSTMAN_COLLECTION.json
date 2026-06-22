@@ -1,8 +1,9 @@
 {
   "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "name": "Support Ticket System API",
     "description": "Complete API collection for Support Ticket Management System with Lookup Tables and Role Management",
-    "version": "2.0.0"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
@@ -10,7 +11,13 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": "http://localhost:3000/api/health"
+        "url": {
+          "raw": "http://localhost:3000/api/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "health"]
+        }
       }
     },
     {
@@ -21,7 +28,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/lookups/all"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/all",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "all"]
+            }
           }
         },
         {
@@ -29,7 +42,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/lookups/roles"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/roles",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "roles"]
+            }
           }
         },
         {
@@ -37,7 +56,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/lookups/roles/1"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/roles/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "roles", "1"]
+            }
           }
         },
         {
@@ -45,16 +70,20 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"manager\",\n  \"description\": \"Manager role\",\n  \"status\": \"active\"\n}"
+              "raw": "{\n  \"name\": \"manager\",\n  \"description\": \"Manager role\",\n  \"status\": \"active\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/lookups/roles"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/roles",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "roles"]
+            }
           }
         },
         {
@@ -62,7 +91,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/lookups/priorities"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/priorities",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "priorities"]
+            }
           }
         },
         {
@@ -70,7 +105,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/lookups/priorities/1"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/priorities/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "priorities", "1"]
+            }
           }
         },
         {
@@ -78,7 +119,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/lookups/statuses"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/statuses",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "statuses"]
+            }
           }
         },
         {
@@ -86,7 +133,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/lookups/statuses/1"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/statuses/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "statuses", "1"]
+            }
           }
         },
         {
@@ -94,7 +147,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/lookups/categories"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/categories",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "categories"]
+            }
           }
         },
         {
@@ -102,7 +161,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/lookups/categories/1"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/categories/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "categories", "1"]
+            }
           }
         },
         {
@@ -110,16 +175,20 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Security Issue\",\n  \"description\": \"Security-related issues\",\n  \"status\": \"active\"\n}"
+              "raw": "{\n  \"name\": \"Security Issue\",\n  \"description\": \"Security-related issues\",\n  \"status\": \"active\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/lookups/categories"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/categories",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "categories"]
+            }
           }
         },
         {
@@ -127,16 +196,20 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"description\": \"Updated description\"\n}"
+              "raw": "{\n  \"description\": \"Updated description\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/lookups/categories/1"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/categories/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "categories", "1"]
+            }
           }
         },
         {
@@ -144,7 +217,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/lookups/departments"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/departments",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "departments"]
+            }
           }
         },
         {
@@ -152,7 +231,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/lookups/departments/1"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/departments/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "departments", "1"]
+            }
           }
         },
         {
@@ -160,16 +245,20 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Human Resources\",\n  \"description\": \"HR Department\",\n  \"email\": \"hr@example.com\",\n  \"phone\": \"1234567850\"\n}"
+              "raw": "{\n  \"name\": \"Human Resources\",\n  \"description\": \"HR Department\",\n  \"email\": \"hr@example.com\",\n  \"phone\": \"1234567850\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/lookups/departments"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/departments",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "departments"]
+            }
           }
         },
         {
@@ -177,16 +266,20 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"newemail@example.com\"\n}"
+              "raw": "{\n  \"email\": \"newemail@example.com\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/lookups/departments/1"
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/departments/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "departments", "1"]
+            }
           }
         }
       ]
@@ -199,7 +292,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/users"
+            "url": {
+              "raw": "http://localhost:3000/api/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users"]
+            }
           }
         },
         {
@@ -207,7 +306,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/users/1"
+            "url": {
+              "raw": "http://localhost:3000/api/users/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "1"]
+            }
           }
         },
         {
@@ -215,16 +320,20 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"newuser@example.com\",\n  \"phone\": \"5555555555\",\n  \"role_id\": 1,\n  \"department_id\": 1\n}"
+              "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"newuser@example.com\",\n  \"phone\": \"5555555555\",\n  \"role_id\": 1,\n  \"department_id\": 1\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/users"
+            "url": {
+              "raw": "http://localhost:3000/api/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users"]
+            }
           }
         },
         {
@@ -232,16 +341,20 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated User\",\n  \"role_id\": 2,\n  \"department_id\": 2,\n  \"status\": \"active\"\n}"
+              "raw": "{\n  \"name\": \"Updated User\",\n  \"role_id\": 2,\n  \"department_id\": 2,\n  \"status\": \"active\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/users/1"
+            "url": {
+              "raw": "http://localhost:3000/api/users/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "1"]
+            }
           }
         },
         {
@@ -249,7 +362,13 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "http://localhost:3000/api/users/1"
+            "url": {
+              "raw": "http://localhost:3000/api/users/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "1"]
+            }
           }
         },
         {
@@ -257,7 +376,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/users/1/stats"
+            "url": {
+              "raw": "http://localhost:3000/api/users/1/stats",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "1", "stats"]
+            }
           }
         }
       ]
@@ -270,7 +395,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/tickets"
+            "url": {
+              "raw": "http://localhost:3000/api/tickets",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets"]
+            }
           }
         },
         {
@@ -278,7 +409,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/tickets/1"
+            "url": {
+              "raw": "http://localhost:3000/api/tickets/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets", "1"]
+            }
           }
         },
         {
@@ -286,16 +423,20 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": 4,\n  \"title\": \"Cannot login to account\",\n  \"description\": \"Unable to login to the system. Getting authentication error.\",\n  \"category_id\": 2,\n  \"priority_id\": 3\n}"
+              "raw": "{\n  \"user_id\": 4,\n  \"title\": \"Cannot login to account\",\n  \"description\": \"Unable to login to the system. Getting authentication error.\",\n  \"category_id\": 2,\n  \"priority_id\": 3\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/tickets"
+            "url": {
+              "raw": "http://localhost:3000/api/tickets",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets"]
+            }
           }
         },
         {
@@ -303,16 +444,20 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status_id\": 2,\n  \"priority_id\": 4,\n  \"assigned_to\": 2\n}"
+              "raw": "{\n  \"status_id\": 2,\n  \"priority_id\": 4,\n  \"assigned_to\": 2\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/tickets/1"
+            "url": {
+              "raw": "http://localhost:3000/api/tickets/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets", "1"]
+            }
           }
         },
         {
@@ -320,7 +465,13 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "http://localhost:3000/api/tickets/1"
+            "url": {
+              "raw": "http://localhost:3000/api/tickets/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets", "1"]
+            }
           }
         },
         {
@@ -328,16 +479,20 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": 2,\n  \"comment\": \"I have investigated the issue. Working on it.\"\n}"
+              "raw": "{\n  \"user_id\": 2,\n  \"comment\": \"I have investigated the issue. Working on it.\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/tickets/1/comments"
+            "url": {
+              "raw": "http://localhost:3000/api/tickets/1/comments",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets", "1", "comments"]
+            }
           }
         },
         {
@@ -345,7 +500,13 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "http://localhost:3000/api/tickets/1/comments"
+            "url": {
+              "raw": "http://localhost:3000/api/tickets/1/comments",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets", "1", "comments"]
+            }
           }
         }
       ]

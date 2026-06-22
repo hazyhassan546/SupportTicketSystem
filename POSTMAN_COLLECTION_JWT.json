@@ -1,8 +1,9 @@
 {
   "info": {
+    "_postman_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
     "name": "Support Ticket System API - With JWT Auth",
     "description": "Complete API collection with JWT Authentication",
-    "version": "3.0.0"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
     "type": "bearer",
@@ -20,7 +21,13 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": "http://localhost:3000/api/health"
+        "url": {
+          "raw": "http://localhost:3000/api/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "health"]
+        }
       }
     },
     {
@@ -31,16 +38,20 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"SecurePassword123\",\n  \"phone\": \"5555555555\",\n  \"role_id\": 1,\n  \"department_id\": 1\n}"
+              "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"SecurePassword123\",\n  \"phone\": \"5555555555\",\n  \"role_id\": 1,\n  \"department_id\": 1\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/auth/register"
+            "url": {
+              "raw": "http://localhost:3000/api/auth/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "register"]
+            }
           }
         },
         {
@@ -49,12 +60,11 @@
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "if (pm.response.code === 200 || pm.response.code === 401) {",
-                  "  var jsonData = pm.response.json();",
-                  "  if (jsonData.success && jsonData.data.token) {",
-                  "    pm.environment.set('token', jsonData.data.token);",
-                  "  }",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data && jsonData.data.token) {",
+                  "  pm.environment.set('token', jsonData.data.token);",
                   "}"
                 ]
               }
@@ -63,44 +73,56 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Password123!\"\n}"
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Password123!\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/auth/login"
+            "url": {
+              "raw": "http://localhost:3000/api/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "login"]
+            }
           }
         },
         {
           "name": "Verify Token",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/auth/verify"
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/auth/verify",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "verify"]
+            }
           }
         },
         {
           "name": "Get Current User Profile",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/auth/me"
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/auth/me",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "me"]
+            }
           }
         },
         {
@@ -108,21 +130,24 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword456!\"\n}"
+              "raw": "{\n  \"currentPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword456!\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/auth/change-password"
+            "url": {
+              "raw": "http://localhost:3000/api/auth/change-password",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "change-password"]
+            }
           }
         }
       ]
@@ -134,84 +159,84 @@
           "name": "Get All Lookups",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/lookups/all"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/all",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "all"]
+            }
           }
         },
         {
           "name": "Get All Roles",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/lookups/roles"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/roles",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "roles"]
+            }
           }
         },
         {
           "name": "Get All Priorities",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/lookups/priorities"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/priorities",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "priorities"]
+            }
           }
         },
         {
           "name": "Get All Statuses",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/lookups/statuses"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/statuses",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "statuses"]
+            }
           }
         },
         {
           "name": "Get All Categories",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/lookups/categories"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/categories",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "categories"]
+            }
           }
         },
         {
           "name": "Get All Departments",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/lookups/departments"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/lookups/departments",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "lookups", "departments"]
+            }
           }
         }
       ]
@@ -223,28 +248,28 @@
           "name": "Get All Users",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/users"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users"]
+            }
           }
         },
         {
           "name": "Get User by ID",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/users/1"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/users/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "1"]
+            }
           }
         },
         {
@@ -252,21 +277,20 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Support Agent\",\n  \"email\": \"agent@example.com\",\n  \"phone\": \"5555555555\",\n  \"role_id\": 2,\n  \"department_id\": 1\n}"
+              "raw": "{\n  \"name\": \"Support Agent\",\n  \"email\": \"agent@example.com\",\n  \"phone\": \"5555555555\",\n  \"role_id\": 2,\n  \"department_id\": 1\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/users"
+            "url": {
+              "raw": "http://localhost:3000/api/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users"]
+            }
           }
         },
         {
@@ -274,49 +298,48 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated User\",\n  \"role_id\": 2,\n  \"department_id\": 2\n}"
+              "raw": "{\n  \"name\": \"Updated User\",\n  \"role_id\": 2,\n  \"department_id\": 2\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/users/7"
+            "url": {
+              "raw": "http://localhost:3000/api/users/7",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "7"]
+            }
           }
         },
         {
           "name": "Delete User",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/users/7"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/users/7",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "7"]
+            }
           }
         },
         {
           "name": "Get User Statistics",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/users/1/stats"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/users/1/stats",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "1", "stats"]
+            }
           }
         }
       ]
@@ -328,28 +351,28 @@
           "name": "Get All Tickets",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/tickets"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/tickets",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets"]
+            }
           }
         },
         {
           "name": "Get Ticket by ID",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/tickets/1"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/tickets/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets", "1"]
+            }
           }
         },
         {
@@ -357,21 +380,20 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": 4,\n  \"title\": \"Server Down\",\n  \"description\": \"Production server is not responding\",\n  \"category_id\": 1,\n  \"priority_id\": 4\n}"
+              "raw": "{\n  \"user_id\": 4,\n  \"title\": \"Server Down\",\n  \"description\": \"Production server is not responding\",\n  \"category_id\": 1,\n  \"priority_id\": 4\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/tickets"
+            "url": {
+              "raw": "http://localhost:3000/api/tickets",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets"]
+            }
           }
         },
         {
@@ -379,35 +401,34 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status_id\": 2,\n  \"assigned_to\": 2,\n  \"priority_id\": 4\n}"
+              "raw": "{\n  \"status_id\": 2,\n  \"assigned_to\": 2,\n  \"priority_id\": 4\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/tickets/1"
+            "url": {
+              "raw": "http://localhost:3000/api/tickets/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets", "1"]
+            }
           }
         },
         {
           "name": "Delete Ticket",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/tickets/1"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/tickets/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets", "1"]
+            }
           }
         },
         {
@@ -415,35 +436,34 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": 2,\n  \"comment\": \"Investigating the issue. Will update soon.\"\n}"
+              "raw": "{\n  \"user_id\": 2,\n  \"comment\": \"Investigating the issue. Will update soon.\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "url": "http://localhost:3000/api/tickets/1/comments"
+            "url": {
+              "raw": "http://localhost:3000/api/tickets/1/comments",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets", "1", "comments"]
+            }
           }
         },
         {
           "name": "Get Ticket Comments",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": "http://localhost:3000/api/tickets/1/comments"
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/tickets/1/comments",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "tickets", "1", "comments"]
+            }
           }
         }
       ]
