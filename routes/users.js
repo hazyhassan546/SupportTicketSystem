@@ -1,9 +1,12 @@
 var express = require('express');
 var router = express.Router();
 var pool = require('../db');
+var { checkRole } = require('../middleware/auth');
 
-// GET all users
-router.get('/', async (req, res) => {
+const adminOnly = checkRole([3]); // role_id 3 = admin
+
+// GET all users — admin only
+router.get('/', adminOnly, async (req, res) => {
   try {
     const connection = await pool.getConnection();
     const [users] = await connection.query(
@@ -83,8 +86,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// CREATE new user
-router.post('/', async (req, res) => {
+// CREATE new user — admin only
+router.post('/', adminOnly, async (req, res) => {
   try {
     const { name, email, phone, role_id, department_id } = req.body;
 
@@ -171,8 +174,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// UPDATE user
-router.put('/:id', async (req, res) => {
+// UPDATE user — admin only
+router.put('/:id', adminOnly, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, email, phone, role_id, department_id, status } = req.body;
@@ -272,8 +275,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE user
-router.delete('/:id', async (req, res) => {
+// DELETE user — admin only
+router.delete('/:id', adminOnly, async (req, res) => {
   try {
     const { id } = req.params;
     const connection = await pool.getConnection();
