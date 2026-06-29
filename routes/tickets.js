@@ -1,9 +1,9 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
-var pool = require('../db');
+var pool = require("../db");
 
 // GET all tickets
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const user_id = req.user.id;
     const connection = await pool.getConnection();
@@ -20,29 +20,29 @@ router.get('/', async (req, res) => {
        LEFT JOIN ticket_statuses ts ON t.status_id = ts.id
        WHERE t.user_id = ? OR t.assigned_to = ?
        ORDER BY t.created_at DESC`,
-      [user_id, user_id]
+      [user_id, user_id],
     );
-    connection.release(); 
-    
+    connection.release();
+
     res.json({
       success: true,
-      data: tickets
+      data: tickets,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error fetching tickets',
-      error: error.message
+      message: "Error fetching tickets",
+      error: error.message,
     });
   }
 });
 
 // GET single ticket by ID
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const connection = await pool.getConnection();
-    
+
     const [tickets] = await connection.query(
       `SELECT t.*, u.name as user_name, u.email as user_email,
               a.name as assigned_name, r.name as role_name,
@@ -55,14 +55,14 @@ router.get('/:id', async (req, res) => {
        LEFT JOIN priorities p ON t.priority_id = p.id
        LEFT JOIN ticket_statuses ts ON t.status_id = ts.id
        WHERE t.id = ?`,
-      [id]
+      [id],
     );
-    
+
     if (tickets.length === 0) {
       connection.release();
       return res.status(404).json({
         success: false,
-        message: 'Ticket not found'
+        message: "Ticket not found",
       });
     }
 
@@ -74,38 +74,39 @@ router.get('/:id', async (req, res) => {
        LEFT JOIN roles r ON u.role_id = r.id
        WHERE tc.ticket_id = ?
        ORDER BY tc.created_at DESC`,
-      [id]
+      [id],
     );
-    
+
     connection.release();
-    
+
     res.json({
       success: true,
       data: {
         ...tickets[0],
-        comments: comments
-      }
+        comments: comments,
+      },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error fetching ticket',
-      error: error.message
+      message: "Error fetching ticket",
+      error: error.message,
     });
   }
 });
 
 // CREATE new ticket
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const user_id = req.user.id;
-    const { title, description, category_id, priority_id } = req.body;
+    const { title, description, category_id, priority_id, department_id } =
+      req.body;
 
     // Validation
     if (!title || !description || !category_id) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: title, description, category_id'
+        message: "Missing required fields: title, description, category_id",
       });
     }
 
@@ -113,82 +114,114 @@ router.post('/', async (req, res) => {
 
     // Check if category exists
     const [categories] = await connection.query(
-      'SELECT id FROM ticket_categories WHERE id = ?',
-      [category_id]
+      "SELECT id FROM ticket_categories WHERE id = ?",
+      [category_id],
     );
 
     if (categories.length === 0) {
       connection.release();
       return res.status(404).json({
         success: false,
-        message: 'Category not found'
+        message: "Category not found",
       });
     }
+
+    // Check if department exists
+    const [departments] = await connection.query(
+      "SELECT id, manager_id FROM departments WHERE id = ?",
+      [department_id],
+    );
+
+    if (departments.length === 0) {
+      connection.release();
+      return res.status(404).json({
+        success: false,
+        message: "Department not found",
+      });
+    }
+
+    console.log("departments", departments);
 
     // Check if priority exists (if provided)
     if (priority_id) {
       const [priorities] = await connection.query(
-        'SELECT id FROM priorities WHERE id = ?',
-        [priority_id]
+        "SELECT id FROM priorities WHERE id = ?",
+        [priority_id],
       );
       if (priorities.length === 0) {
         connection.release();
         return res.status(404).json({
           success: false,
-          message: 'Priority not found'
+          message: "Priority not found",
         });
       }
     }
 
     const [result] = await connection.query(
-      `INSERT INTO tickets (user_id, title, description, category_id, priority_id, status_id)
-       VALUES (?, ?, ?, ?, ?, 1)`,
-      [user_id, title, description, category_id, priority_id || 2]
+      `INSERT INTO tickets (user_id, title, description, category_id, department_id, assigned_to, priority_id, status_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+      [
+        user_id,
+        title,
+        description,
+        category_id,
+        department_id,
+        departments[0].manager_id,
+        priority_id || 2,
+      ],
     );
-    
+
     connection.release();
 
     res.status(201).json({
       success: true,
-      message: 'Ticket created successfully',
+      message: "Ticket created successfully",
       data: {
         id: result.insertId,
         user_id,
         title,
         description,
         category_id,
+        department_id,
         priority_id: priority_id || 2,
-        status_id: 1
-      }
+        status_id: 1,
+      },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error creating ticket',
-      error: error.message
+      message: "Error creating ticket",
+      error: error.message,
     });
   }
 });
 
 // UPDATE ticket
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, category_id, priority_id, status_id, assigned_to } = req.body;
+    const {
+      title,
+      description,
+      category_id,
+      priority_id,
+      status_id,
+      assigned_to,
+    } = req.body;
 
     const connection = await pool.getConnection();
 
     // Check if ticket exists
     const [tickets] = await connection.query(
-      'SELECT id FROM tickets WHERE id = ?',
-      [id]
+      "SELECT id FROM tickets WHERE id = ?",
+      [id],
     );
 
     if (tickets.length === 0) {
       connection.release();
       return res.status(404).json({
         success: false,
-        message: 'Ticket not found'
+        message: "Ticket not found",
       });
     }
 
@@ -197,32 +230,32 @@ router.put('/:id', async (req, res) => {
     const updateValues = [];
 
     if (title !== undefined) {
-      updateFields.push('title = ?');
+      updateFields.push("title = ?");
       updateValues.push(title);
     }
     if (description !== undefined) {
-      updateFields.push('description = ?');
+      updateFields.push("description = ?");
       updateValues.push(description);
     }
     if (category_id !== undefined) {
-      updateFields.push('category_id = ?');
+      updateFields.push("category_id = ?");
       updateValues.push(category_id);
     }
     if (priority_id !== undefined) {
-      updateFields.push('priority_id = ?');
+      updateFields.push("priority_id = ?");
       updateValues.push(priority_id);
     }
     if (status_id !== undefined) {
-      updateFields.push('status_id = ?');
+      updateFields.push("status_id = ?");
       updateValues.push(status_id);
-      
+
       // Set resolved_at if status is resolved (status_id = 4)
       if (status_id === 4) {
-        updateFields.push('resolved_at = NOW()');
+        updateFields.push("resolved_at = NOW()");
       }
     }
     if (assigned_to !== undefined) {
-      updateFields.push('assigned_to = ?');
+      updateFields.push("assigned_to = ?");
       updateValues.push(assigned_to);
     }
 
@@ -230,70 +263,70 @@ router.put('/:id', async (req, res) => {
       connection.release();
       return res.status(400).json({
         success: false,
-        message: 'No fields to update'
+        message: "No fields to update",
       });
     }
 
     updateValues.push(id);
 
     await connection.query(
-      `UPDATE tickets SET ${updateFields.join(', ')} WHERE id = ?`,
-      updateValues
+      `UPDATE tickets SET ${updateFields.join(", ")} WHERE id = ?`,
+      updateValues,
     );
 
     connection.release();
 
     res.json({
       success: true,
-      message: 'Ticket updated successfully'
+      message: "Ticket updated successfully",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error updating ticket',
-      error: error.message
+      message: "Error updating ticket",
+      error: error.message,
     });
   }
 });
 
 // DELETE ticket
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const connection = await pool.getConnection();
 
     // Check if ticket exists
     const [tickets] = await connection.query(
-      'SELECT id FROM tickets WHERE id = ?',
-      [id]
+      "SELECT id FROM tickets WHERE id = ?",
+      [id],
     );
 
     if (tickets.length === 0) {
       connection.release();
       return res.status(404).json({
         success: false,
-        message: 'Ticket not found'
+        message: "Ticket not found",
       });
     }
 
-    await connection.query('DELETE FROM tickets WHERE id = ?', [id]);
+    await connection.query("DELETE FROM tickets WHERE id = ?", [id]);
     connection.release();
 
     res.json({
       success: true,
-      message: 'Ticket deleted successfully'
+      message: "Ticket deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error deleting ticket',
-      error: error.message
+      message: "Error deleting ticket",
+      error: error.message,
     });
   }
 });
 
 // ADD comment to ticket
-router.post('/:id/comments', async (req, res) => {
+router.post("/:id/comments", async (req, res) => {
   try {
     const { id } = req.params;
     const { user_id, comment } = req.body;
@@ -301,7 +334,7 @@ router.post('/:id/comments', async (req, res) => {
     if (!user_id || !comment) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: user_id, comment'
+        message: "Missing required fields: user_id, comment",
       });
     }
 
@@ -309,60 +342,60 @@ router.post('/:id/comments', async (req, res) => {
 
     // Check if ticket exists
     const [tickets] = await connection.query(
-      'SELECT id FROM tickets WHERE id = ?',
-      [id]
+      "SELECT id FROM tickets WHERE id = ?",
+      [id],
     );
 
     if (tickets.length === 0) {
       connection.release();
       return res.status(404).json({
         success: false,
-        message: 'Ticket not found'
+        message: "Ticket not found",
       });
     }
 
     // Check if user exists
     const [users] = await connection.query(
-      'SELECT id FROM users WHERE id = ?',
-      [user_id]
+      "SELECT id FROM users WHERE id = ?",
+      [user_id],
     );
 
     if (users.length === 0) {
       connection.release();
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
     const [result] = await connection.query(
-      'INSERT INTO ticket_comments (ticket_id, user_id, comment) VALUES (?, ?, ?)',
-      [id, user_id, comment]
+      "INSERT INTO ticket_comments (ticket_id, user_id, comment) VALUES (?, ?, ?)",
+      [id, user_id, comment],
     );
 
     connection.release();
 
     res.status(201).json({
       success: true,
-      message: 'Comment added successfully',
+      message: "Comment added successfully",
       data: {
         id: result.insertId,
         ticket_id: id,
         user_id,
-        comment
-      }
+        comment,
+      },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error adding comment',
-      error: error.message
+      message: "Error adding comment",
+      error: error.message,
     });
   }
 });
 
 // GET ticket comments
-router.get('/:id/comments', async (req, res) => {
+router.get("/:id/comments", async (req, res) => {
   try {
     const { id } = req.params;
     const connection = await pool.getConnection();
@@ -373,20 +406,20 @@ router.get('/:id/comments', async (req, res) => {
        LEFT JOIN users u ON tc.user_id = u.id
        WHERE tc.ticket_id = ?
        ORDER BY tc.created_at DESC`,
-      [id]
+      [id],
     );
 
     connection.release();
 
     res.json({
       success: true,
-      data: comments
+      data: comments,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error fetching comments',
-      error: error.message
+      message: "Error fetching comments",
+      error: error.message,
     });
   }
 });
