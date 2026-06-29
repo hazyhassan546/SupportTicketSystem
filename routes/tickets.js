@@ -5,9 +5,10 @@ var pool = require('../db');
 // GET all tickets
 router.get('/', async (req, res) => {
   try {
+    const user_id = req.user.id;
     const connection = await pool.getConnection();
     const [tickets] = await connection.query(
-      `SELECT t.*, u.name as user_name, u.email as user_email, 
+      `SELECT t.*, u.name as user_name, u.email as user_email,
               a.name as assigned_name, r.name as role_name,
               tc.name as category_name, p.name as priority_name, ts.name as status_name
        FROM tickets t
@@ -17,9 +18,11 @@ router.get('/', async (req, res) => {
        LEFT JOIN ticket_categories tc ON t.category_id = tc.id
        LEFT JOIN priorities p ON t.priority_id = p.id
        LEFT JOIN ticket_statuses ts ON t.status_id = ts.id
-       ORDER BY t.created_at DESC`
+       WHERE t.user_id = ? OR t.assigned_to = ?
+       ORDER BY t.created_at DESC`,
+      [user_id, user_id]
     );
-    connection.release();
+    connection.release(); 
     
     res.json({
       success: true,
@@ -95,31 +98,18 @@ router.get('/:id', async (req, res) => {
 // CREATE new ticket
 router.post('/', async (req, res) => {
   try {
-    const { user_id, title, description, category_id, priority_id } = req.body;
+    const user_id = req.user.id;
+    const { title, description, category_id, priority_id } = req.body;
 
     // Validation
-    if (!user_id || !title || !description || !category_id) {
+    if (!title || !description || !category_id) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: user_id, title, description, category_id'
+        message: 'Missing required fields: title, description, category_id'
       });
     }
 
     const connection = await pool.getConnection();
-    
-    // Check if user exists
-    const [users] = await connection.query(
-      'SELECT id FROM users WHERE id = ?',
-      [user_id]
-    );
-
-    if (users.length === 0) {
-      connection.release();
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
 
     // Check if category exists
     const [categories] = await connection.query(

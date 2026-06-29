@@ -1,8 +1,8 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
-var pool = require('../db');
-var jwt = require('jsonwebtoken');
-var bcrypt = require('bcryptjs');
+var pool = require("../db");
+var jwt = require("jsonwebtoken");
+var bcrypt = require("bcryptjs");
 
 // Generate JWT Token
 const generateToken = (user) => {
@@ -11,23 +11,23 @@ const generateToken = (user) => {
       id: user.id,
       email: user.email,
       role_id: user.role_id,
-      name: user.name
+      name: user.name,
     },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRE || '7d' }
-  ); 
+    { expiresIn: process.env.JWT_EXPIRE || "7d" },
+  );
 };
 
 // Register new user
-router.post('/register', async (req, res) => {
+router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, phone, role_id, department_id } = req.body;
+    const { name, email, password, phone, department_id } = req.body;
 
     // Validation
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: name, email, password'
+        message: "Missing required fields: name, email, password",
       });
     }
 
@@ -36,7 +36,7 @@ router.post('/register', async (req, res) => {
     if (!emailRegex.test(email)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid email format'
+        message: "Invalid email format",
       });
     }
 
@@ -44,7 +44,7 @@ router.post('/register', async (req, res) => {
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 6 characters long'
+        message: "Password must be at least 6 characters long",
       });
     }
 
@@ -53,25 +53,35 @@ router.post('/register', async (req, res) => {
     try {
       // Check if user already exists
       const [existingUsers] = await connection.query(
-        'SELECT id FROM users WHERE email = ?',
-        [email]
+        "SELECT id FROM users WHERE email = ?",
+        [email],
       );
 
       if (existingUsers.length > 0) {
         connection.release();
         return res.status(409).json({
           success: false,
-          message: 'Email already registered'
+          message: "Email already registered",
         });
       }
 
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
+      console.log("department_id", department_id);
+
       // Insert new user
       const [result] = await connection.query(
-        'INSERT INTO users (name, email, password, phone, role_id, department_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [name, email, hashedPassword, phone || null, role_id || 1, department_id || null, 'active']
+        "INSERT INTO users (name, email, password, phone, role_id, department_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [
+          name,
+          email,
+          hashedPassword,
+          phone || null,
+          1,
+          department_id || null,
+          "active",
+        ],
       );
 
       // Fetch the created user
@@ -81,7 +91,7 @@ router.post('/register', async (req, res) => {
          LEFT JOIN roles r ON u.role_id = r.id
          LEFT JOIN departments d ON u.department_id = d.id
          WHERE u.id = ?`,
-        [result.insertId]
+        [result.insertId],
       );
 
       // Generate token
@@ -90,26 +100,32 @@ router.post('/register', async (req, res) => {
       // Save session to DB
       const expiresAt = new Date(jwt.decode(token).exp * 1000);
       await connection.query(
-        'INSERT INTO sessions (user_id, token, ip_address, user_agent, expires_at) VALUES (?, ?, ?, ?, ?)',
-        [newUser[0].id, token, req.ip || null, req.headers['user-agent'] || null, expiresAt]
+        "INSERT INTO sessions (user_id, token, ip_address, user_agent, expires_at) VALUES (?, ?, ?, ?, ?)",
+        [
+          newUser[0].id,
+          token,
+          req.ip || null,
+          req.headers["user-agent"] || null,
+          expiresAt,
+        ],
       );
 
       connection.release();
 
       res.status(201).json({
         success: true,
-        message: 'User registered successfully',
+        message: "User registered successfully",
         data: {
           user: newUser[0],
-          token: token
-        }
+          token: token,
+        },
       });
     } catch (queryError) {
       connection.release();
-      if (queryError.code === 'ER_DUP_ENTRY') {
+      if (queryError.code === "ER_DUP_ENTRY") {
         return res.status(409).json({
           success: false,
-          message: 'Email already exists'
+          message: "Email already exists",
         });
       }
       throw queryError;
@@ -117,14 +133,14 @@ router.post('/register', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error registering user',
-      error: error.message
+      message: "Error registering user",
+      error: error.message,
     });
   }
 });
 
 // Login user
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -132,7 +148,7 @@ router.post('/login', async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: email, password'
+        message: "Missing required fields: email, password",
       });
     }
 
@@ -147,25 +163,25 @@ router.post('/login', async (req, res) => {
          LEFT JOIN roles r ON u.role_id = r.id
          LEFT JOIN departments d ON u.department_id = d.id
          WHERE u.email = ?`,
-        [email]
+        [email],
       );
 
       if (users.length === 0) {
         connection.release();
         return res.status(401).json({
           success: false,
-          message: 'Invalid email or password'
+          message: "Invalid email or password",
         });
       }
 
       const user = users[0];
 
       // Check if user is active
-      if (user.status !== 'active') {
+      if (user.status !== "active") {
         connection.release();
         return res.status(403).json({
           success: false,
-          message: 'User account is inactive'
+          message: "User account is inactive",
         });
       }
 
@@ -176,7 +192,7 @@ router.post('/login', async (req, res) => {
         connection.release();
         return res.status(401).json({
           success: false,
-          message: 'Invalid email or password'
+          message: "Invalid email or password",
         });
       }
 
@@ -186,8 +202,14 @@ router.post('/login', async (req, res) => {
       // Save session to DB
       const expiresAt = new Date(jwt.decode(token).exp * 1000);
       await connection.query(
-        'INSERT INTO sessions (user_id, token, ip_address, user_agent, expires_at) VALUES (?, ?, ?, ?, ?)',
-        [user.id, token, req.ip || null, req.headers['user-agent'] || null, expiresAt]
+        "INSERT INTO sessions (user_id, token, ip_address, user_agent, expires_at) VALUES (?, ?, ?, ?, ?)",
+        [
+          user.id,
+          token,
+          req.ip || null,
+          req.headers["user-agent"] || null,
+          expiresAt,
+        ],
       );
 
       connection.release();
@@ -197,11 +219,11 @@ router.post('/login', async (req, res) => {
 
       res.json({
         success: true,
-        message: 'Login successful',
+        message: "Login successful",
         data: {
           user: userWithoutPassword,
-          token: token
-        }
+          token: token,
+        },
       });
     } catch (queryError) {
       connection.release();
@@ -210,21 +232,21 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error during login',
-      error: error.message
+      message: "Error during login",
+      error: error.message,
     });
   }
 });
 
 // Verify token endpoint (to check if token is still valid)
-router.post('/verify', async (req, res) => {
+router.post("/verify", async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'No token provided'
+        message: "No token provided",
       });
     }
 
@@ -232,34 +254,34 @@ router.post('/verify', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Token is valid',
+      message: "Token is valid",
       data: {
-        user: decoded
-      }
+        user: decoded,
+      },
     });
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
+    if (error.name === "TokenExpiredError") {
       return res.status(401).json({
         success: false,
-        message: 'Token has expired'
+        message: "Token has expired",
       });
     }
     res.status(403).json({
       success: false,
-      message: 'Invalid token'
+      message: "Invalid token",
     });
   }
 });
 
 // Get current user profile
-router.get('/me', async (req, res) => {
+router.get("/me", async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'No token provided'
+        message: "No token provided",
       });
     }
 
@@ -273,7 +295,7 @@ router.get('/me', async (req, res) => {
        LEFT JOIN roles r ON u.role_id = r.id
        LEFT JOIN departments d ON u.department_id = d.id
        WHERE u.id = ? AND u.status = 'active'`,
-      [decoded.id]
+      [decoded.id],
     );
 
     connection.release();
@@ -281,47 +303,47 @@ router.get('/me', async (req, res) => {
     if (users.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
     res.json({
       success: true,
-      data: users[0]
+      data: users[0],
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error fetching user profile',
-      error: error.message
+      message: "Error fetching user profile",
+      error: error.message,
     });
   }
 });
 
 // Change password
-router.post('/change-password', async (req, res) => {
+router.post("/change-password", async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.headers.authorization?.split(" ")[1];
     const { currentPassword, newPassword } = req.body;
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'No token provided'
+        message: "No token provided",
       });
     }
 
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: currentPassword, newPassword'
+        message: "Missing required fields: currentPassword, newPassword",
       });
     }
 
     if (newPassword.length < 6) {
       return res.status(400).json({
         success: false,
-        message: 'New password must be at least 6 characters long'
+        message: "New password must be at least 6 characters long",
       });
     }
 
@@ -331,26 +353,29 @@ router.post('/change-password', async (req, res) => {
     try {
       // Get user with password
       const [users] = await connection.query(
-        'SELECT id, password FROM users WHERE id = ?',
-        [decoded.id]
+        "SELECT id, password FROM users WHERE id = ?",
+        [decoded.id],
       );
 
       if (users.length === 0) {
         connection.release();
         return res.status(404).json({
           success: false,
-          message: 'User not found'
+          message: "User not found",
         });
       }
 
       // Verify current password
-      const isPasswordValid = await bcrypt.compare(currentPassword, users[0].password);
+      const isPasswordValid = await bcrypt.compare(
+        currentPassword,
+        users[0].password,
+      );
 
       if (!isPasswordValid) {
         connection.release();
         return res.status(401).json({
           success: false,
-          message: 'Current password is incorrect'
+          message: "Current password is incorrect",
         });
       }
 
@@ -358,32 +383,32 @@ router.post('/change-password', async (req, res) => {
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
       // Update password
-      await connection.query(
-        'UPDATE users SET password = ? WHERE id = ?',
-        [hashedPassword, decoded.id]
-      );
+      await connection.query("UPDATE users SET password = ? WHERE id = ?", [
+        hashedPassword,
+        decoded.id,
+      ]);
 
       connection.release();
 
       res.json({
         success: true,
-        message: 'Password changed successfully'
+        message: "Password changed successfully",
       });
     } catch (queryError) {
       connection.release();
       throw queryError;
     }
   } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
+    if (error.name === "JsonWebTokenError") {
       return res.status(403).json({
         success: false,
-        message: 'Invalid token'
+        message: "Invalid token",
       });
     }
     res.status(500).json({
       success: false,
-      message: 'Error changing password',
-      error: error.message
+      message: "Error changing password",
+      error: error.message,
     });
   }
 });
