@@ -18,6 +18,7 @@ var authRouter = require('./routes/auth');
 var usersRouter = require('./routes/users');
 var ticketsRouter = require('./routes/tickets');
 var lookupsRouter = require('./routes/lookups');
+var aiRouter = require('./routes/ai');
 
 var app = express();
 
@@ -54,6 +55,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Protected routes (require JWT token)
+app.use('/api/ai', verifyToken, aiRouter);
 app.use('/api/users', verifyToken, usersRouter);
 app.use('/api/tickets', verifyToken, ticketsRouter);
 app.use('/api/lookups', 
