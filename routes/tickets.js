@@ -95,12 +95,18 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// CREATE new ticket
+// CREATE new ticket ( draft ticket creation route)
 router.post("/", async (req, res) => {
   try {
     const user_id = req.user.id;
-    const { title, description, category_id, priority_id, department_id } =
-      req.body;
+    const {
+      title,
+      description,
+      category_id,
+      priority_id,
+      department_id,
+      is_submitted,
+    } = req.body;
 
     // Validation
     if (!title || !description || !category_id) {
@@ -157,9 +163,11 @@ router.post("/", async (req, res) => {
       }
     }
 
+    const status = is_submitted ? 1 : 6; // 1 for submitted, 6 for draft
+
     const [result] = await connection.query(
       `INSERT INTO tickets (user_id, title, description, category_id, department_id, assigned_to, priority_id, status_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?,?)`,
       [
         user_id,
         title,
@@ -168,6 +176,7 @@ router.post("/", async (req, res) => {
         department_id,
         departments[0].manager_id,
         priority_id || 2,
+        status,
       ],
     );
 
@@ -329,12 +338,13 @@ router.delete("/:id", async (req, res) => {
 router.post("/:id/comments", async (req, res) => {
   try {
     const { id } = req.params;
-    const { user_id, comment } = req.body;
+    const { comment } = req.body;
+    const user_id = req.user.id;
 
-    if (!user_id || !comment) {
+    if (!comment) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields: user_id, comment",
+        message: "Missing required fields: comment",
       });
     }
 
@@ -373,17 +383,25 @@ router.post("/:id/comments", async (req, res) => {
       [id, user_id, comment],
     );
 
+    console.log("result", result);
+
+    const [comments] = await connection.query(
+      `SELECT tc.*, u.name, u.email
+       FROM ticket_comments tc
+       LEFT JOIN users u ON tc.user_id = u.id
+       WHERE tc.id = ?
+       ORDER BY tc.created_at DESC`,
+      [parseInt(result.insertId)],
+    );
+
+    console.log("comments", comments);
+
     connection.release();
 
     res.status(201).json({
       success: true,
       message: "Comment added successfully",
-      data: {
-        id: result.insertId,
-        ticket_id: id,
-        user_id,
-        comment,
-      },
+      data: comments[0],
     });
   } catch (error) {
     res.status(500).json({
@@ -419,6 +437,51 @@ router.get("/:id/comments", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error fetching comments",
+      error: error.message,
+    });
+  }
+});
+
+// DELETE comment by id
+router.delete("/comments/:commentId", async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const user_id = req.user.id;
+    const connection = await pool.getConnection();
+
+    const [comments] = await connection.query(
+      "SELECT id, user_id FROM ticket_comments WHERE id = ?",
+      [commentId],
+    );
+
+    if (comments.length === 0) {
+      connection.release();
+      return res.status(404).json({
+        success: false,
+        message: "Comment not found",
+      });
+    }
+
+    // only the author can delete their own comment
+    if (comments[0].user_id !== user_id) {
+      connection.release();
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to delete this comment",
+      });
+    }
+
+    await connection.query("DELETE FROM ticket_comments WHERE id = ?", [commentId]);
+    connection.release();
+
+    res.json({
+      success: true,
+      message: "Comment deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error deleting comment",
       error: error.message,
     });
   }
